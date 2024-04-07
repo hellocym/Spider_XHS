@@ -41,7 +41,7 @@ class Search:
                     break
         return note_ids
 
-    def handle_note_info(self, query, number, sort, need_cover=False):
+    def handle_note_info(self, query, number, sort, path, need_cover=False):
         data = get_search_data()
         data['sort'] = sort
         api = '/api/sns/web/v1/search/notes'
@@ -63,7 +63,7 @@ class Search:
                 break
             for note in items:
                 index += 1
-                self.oneNote.save_one_note_info(self.oneNote.detail_url + note['id'], need_cover, '', 'datas_search')
+                self.oneNote.save_one_note_info(self.oneNote.detail_url + note['id'], need_cover, '', path)
                 if index >= number:
                     break
             if not res['data']['has_more'] and index < number:
@@ -76,20 +76,22 @@ class Search:
         query = info['query']
         number = info['number']
         sort = info['sort']
-        self.handle_note_info(query, number, sort, need_cover=True)
+        path = info['path']
+        self.handle_note_info(query, number, sort, path, need_cover=True)
 
 
 if __name__ == '__main__':
     search = Search()
     # 搜索的关键词 
-    query = '亚运会'
+    query = '上海 名人'
     # 搜索的数量（前多少个）
-    number = 2222
+    number = 1000
     # 排序方式 general: 综合排序 popularity_descending: 热门排序 time_descending: 最新排序
     sort = 'general'
     info = {
         'query': query,
         'number': number,
         'sort': sort,
+        'path': 'datas_celebrity'
     }
     search.main(info)

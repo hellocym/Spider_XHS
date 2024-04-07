@@ -112,19 +112,39 @@ def save_user_detail(path, user):
         f.write(f'标签: {user.tags}\n')
 
 def save_note_detail(path, note):
-    with open(path + '/' + 'detail.txt', mode="w", encoding="utf-8") as f:
-        # 逐行输出到txt里
-        f.write(f"笔记url: {f'https://www.xiaohongshu.com/explore/{note.note_id}'}\n")
-        f.write(f'笔记类型: {note.note_type}\n')
-        f.write(f"笔记标题: {note.title}\n")
-        f.write(f"笔记描述: {note.desc}\n")
-        f.write(f"笔记点赞数量: {note.liked_count}\n")
-        f.write(f"笔记收藏数量: {note.collected_count}\n")
-        f.write(f"笔记评论数量: {note.comment_count}\n")
-        f.write(f"笔记分享数量: {note.share_count}\n")
-        f.write(f"笔记上传时间: {timestamp_to_str(note.upload_time)}\n")
-        f.write(f"笔记标签: {note.tag_list}\n")
-        f.write(f"笔记ip归属地: {note.ip_location}\n")
+    # with open(path + '/' + 'detail.txt', mode="w", encoding="utf-8") as f:
+    #     # 逐行输出到txt里
+    #     f.write(f"笔记url: {f'https://www.xiaohongshu.com/explore/{note.note_id}'}\n")
+    #     f.write(f'笔记类型: {note.note_type}\n')
+    #     f.write(f"笔记标题: {note.title}\n")
+    #     f.write(f"笔记描述: {note.desc}\n")
+    #     f.write(f"笔记点赞数量: {note.liked_count}\n")
+    #     f.write(f"笔记收藏数量: {note.collected_count}\n")
+    #     f.write(f"笔记评论数量: {note.comment_count}\n")
+    #     f.write(f"笔记分享数量: {note.share_count}\n")
+    #     f.write(f"笔记上传时间: {timestamp_to_str(note.upload_time)}\n")
+    #     f.write(f"笔记标签: {note.tag_list}\n")
+    #     f.write(f"笔记ip归属地: {note.ip_location}\n")
+
+    # 保存为json
+    import json
+
+    details = {}
+    details['笔记url'] = f'https://www.xiaohongshu.com/explore/{note.note_id}'
+    details['笔记类型'] = note.note_type
+    details['笔记标题'] = note.title
+    details['笔记描述'] = note.desc
+    details['笔记点赞数量'] = note.liked_count
+    details['笔记收藏数量'] = note.collected_count
+    details['笔记评论数量'] = note.comment_count
+    details['笔记分享数量'] = note.share_count
+    details['笔记上传时间'] = timestamp_to_str(note.upload_time)
+    details['笔记标签'] = note.tag_list
+    details['笔记ip归属地'] = note.ip_location
+    with open(path + '/' + 'detail.json', mode="w", encoding="utf-8") as f:
+        json.dump(details, f, ensure_ascii=False, indent=4)
+
+        
 
 def handle_note_info(data):
     note_id = data['id']

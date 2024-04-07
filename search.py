@@ -3,10 +3,12 @@ import re
 import requests
 from one import OneNote
 from xhs_utils.xhs_util import get_headers, get_search_data, get_params, js, check_cookies
+from queue import Queue
+import threading
 
 
 class Search:
-    def __init__(self, cookies=None):
+    def __init__(self, cookies=None, thread_num=10):
         if cookies is None:
             self.cookies = check_cookies()
         else:
@@ -15,6 +17,7 @@ class Search:
         self.headers = get_headers()
         self.params = get_params()
         self.oneNote = OneNote(self.cookies)
+        self.thread_num = thread_num
 
     def get_search_note(self, query, number):
         data = get_search_data()
@@ -71,13 +74,45 @@ class Search:
                 break
         print(f'搜索结果全部下载完成，共 {index} 个笔记')
 
+    def handle_note_info_multithread(self, query, number, sort, path, need_cover=False):
+        note_ids = self.get_search_note(query, number)
+        queue = Queue()
+        for note_id in note_ids:
+            queue.put(note_id)
+
+        def worker():
+            while not queue.empty():
+                note_id = queue.get()
+                try:
+                    self.oneNote.save_one_note_info(self.oneNote.detail_url + note_id, need_cover, '', path)
+                finally:
+                    queue.task_done()
+
+        threads = []
+        for _ in range(self.thread_num):
+            t = threading.Thread(target=worker)
+            t.start()
+            threads.append(t)
+
+        queue.join()  # Wait for the queue to become empty.
+
+        for _ in range(len(threads)):
+            queue.put(None)  # Signal for threads to exit
+
+        for t in threads:
+            t.join()  # Wait for all threads to finish
+
+        print(f'多线程搜索结果全部下载完成，共 {len(note_ids)} 个笔记')
+
+
+
 
     def main(self, info):
         query = info['query']
         number = info['number']
         sort = info['sort']
         path = info['path']
-        self.handle_note_info(query, number, sort, path, need_cover=True)
+        self.handle_note_info_multithread(query, number, sort, path, need_cover=True)
 
 
 if __name__ == '__main__':
